@@ -1,0 +1,31 @@
+auth
+	user
+	userservice
+	userrepo
+	
+student
+	userservice
+
+teacher
+	userservice
+	
+	
+entity
+	user
+	teacher
+	student
+service
+	userservice
+	teacherS
+	studentS
+repo
+
+auth
+	authS
+		userservice
+		teacherS
+		studentS		
+
+reciept
+controller
+
