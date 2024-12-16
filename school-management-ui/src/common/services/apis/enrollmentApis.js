@@ -32,5 +32,4 @@ export const searchStudentsByFirstName = async (courseId, firstName) => {
     }
     return { response, errorMessage };
 };
-export const addStudentToCourse = async (courseId, studentId, { status, enrollmentDate }) =>
-    apiCall(`/api/v2/enrollments/courses/${courseId}/students/${studentId}/enroll`, 'POST', { status, enrollmentDate });
+export const addStudentToCourse = async (courseId, studentId, enrollmentData) => apiCall(`/api/v2/enrollments/courses/${courseId}/students/${studentId}/enroll`, 'POST', enrollmentData);

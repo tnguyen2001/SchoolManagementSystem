@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Form, Input, Button, DatePicker, TimePicker, Select, Checkbox, message, Row, Col, Space, Typography, Spin } from 'antd';
+import { Form, Input, Button, DatePicker, TimePicker, Select, Checkbox, message, Row, Col, Space, Typography, Spin, InputNumber } from 'antd';
 import moment from 'moment';
 import { getCourseById, createCourse, updateCourse, deleteCourse } from '~/common/services/apis/courseApis';
 import { DayOfWeekEnum } from '~/common/constants/DayOfWeekEnum';
 import urls from '~/common/configs/urls';
-import { CourseStatus } from '~/common/constants/CourseStatus';
 import FormItem from '~/components/FormItem';
+import { FREQUENCIES } from '~/common/constants/Frequency';
+import { CourseStatus } from '~/common/constants/app-enums';
 
 const { Option } = Select;
 const { Title, Text } = Typography;
@@ -45,7 +46,9 @@ const CourseForm = () => {
         }
     };
 
-    const handleSubmit = async (values) => {
+    const handleSubmit = async () => {
+        const values = await form.validateFields();
+        console.log('values:', values);
         setLoading(true); // Show loading spinner while submitting
         const formattedValues = formatCourseValues(values);
         let response, errorMessage;
@@ -121,30 +124,49 @@ const CourseForm = () => {
     const renderForm = () => (
         <Form form={form} onFinish={handleSubmit}>
             <Row gutter={[16, 16]}>
-                <FormItem label="Course Code" name="code" required element={<Input />} />
-                <FormItem label="Course Name" name="name" required element={<Input />} />
-                <FormItem label="Description" name="description" required element={<Input.TextArea rows={4} />} />
+                <FormItem label="Course Code" name="code" rules={[{ required: true }]} element={<Input />} />
+                <FormItem label="Course Name" name="name" rules={[{ required: true }]} element={<Input />} />
+                <FormItem label="Description" name="description" rules={[{ required: true }]} element={<Input.TextArea rows={4} />} />
                 <FormItem
                     label="Status"
                     name="status"
-                    required
+                    rules={[{ required: true }]}
                     element={
                         <Select placeholder="Select status">
-                            {CourseStatus.map((status) => (
-                                <Option key={status} value={status}>
-                                    {status}
+                            {Object.entries(CourseStatus).map(([key, value]) => (
+                                <Option key={key} value={key}>
+                                    {value}
                                 </Option>
                             ))}
                         </Select>
                     }
                 />
 
-                <FormItem label="Start Time" name="startTime" required element={<TimePicker format="HH:mm:ss" />} />
-                <FormItem label="End Time" name="endTime" required element={<TimePicker format="HH:mm:ss" />} />
+                <FormItem label="Start Date" name="startDate" rules={[{ required: true }]} element={<DatePicker format="YYYY-MM-DD" />} />
+                <FormItem label="End Date" name="endDate" element={<DatePicker format="YYYY-MM-DD" />} />
+                <FormItem label="Start Time" name="startTime" rules={[{ required: true }]} element={<TimePicker format="HH:mm:ss" />} />
+                <FormItem label="End Time" name="endTime" rules={[{ required: true }]} element={<TimePicker format="HH:mm:ss" />} />
+                <FormItem
+                    label="Frequency"
+                    name="frequency"
+                    rules={[{ required: true }]}
+                    element={
+                        <Select placeholder="Select frequency">
+                            {FREQUENCIES.map((frequency) => (
+                                <Option key={frequency} value={frequency}>
+                                    {frequency}
+                                </Option>
+                            ))}
+                        </Select>
+                    }
+                />
+                <FormItem label="Total Learning Days" name="totalLearningDays" rules={[{ type: 'number', min: 0, max: 99 }]} element={<InputNumber />} />
+                <FormItem label="Fee amount" name="feeAmount" rules={[{ required: true, type: 'number' }]} element={<InputNumber />} />
+
                 <FormItem
                     label="Days of Week"
                     name="daysOfWeek"
-                    required
+                    rules={[{ required: true }]}
                     element={
                         <Select mode="multiple" placeholder="Select days of the week">
                             {daysOfWeekOptions}

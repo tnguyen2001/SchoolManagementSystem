@@ -7,7 +7,7 @@ import { createStudent, deleteStudent, updateStudent } from '~/common/services/a
 import useCourses from '../courses/useCourses';
 import FormItem from '~/components/FormItem';
 import SelectOption from '~/components/SelectOption';
-import { StatusOptions } from '~/common/constants/options/StatusOptions';
+import { courseStatus } from '~/common/constants/options/CourseStatus';
 import { GenderOptions } from '~/common/constants/options/GenderOptions';
 
 function StudentForm({ initialValues, onSubmit, onCancel }) {
@@ -123,7 +123,7 @@ function StudentForm({ initialValues, onSubmit, onCancel }) {
                                 rules={[{ type: 'object', required: false, message: 'Please select time!' }]}
                                 element={<DatePicker format="YYYY-MM-DD" disabled={disabled} style={{ width: '100%' }} />}
                             />
-                            <FormItem label="Status" name="status" rules={[{ required: false }]} element={<SelectOption options={StatusOptions} />} disabled={disabled} />
+                            <FormItem label="Status" name="status" rules={[{ required: false }]} element={<SelectOption options={courseStatus} />} disabled={disabled} />
                         </>
                     )}
                     {/* Buttons Section */}

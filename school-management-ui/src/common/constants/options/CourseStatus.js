@@ -1,4 +1,4 @@
-export const StatusOptions = [
+export const courseStatus = [
     { value: 'ENROLLED', label: 'ENROLLED' },
     { value: 'COMPLETED', label: 'COMPLETED' },
     { value: 'WITHDRAWN', label: 'WITHDRAWN' },

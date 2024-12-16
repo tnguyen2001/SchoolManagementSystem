@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
-import { Input, List, Button, message, Spin, Modal, DatePicker, Select } from 'antd';
+import { Input, List, Button, message, Spin, Modal, DatePicker, Select, InputNumber, Form } from 'antd';
 import { addStudentToCourse, searchStudentsByPhone, searchStudentsByCode, searchStudentsByFirstName } from '~/common/services/apis/enrollmentApis';
 import { useParams } from 'react-router-dom';
 import dayjs from 'dayjs';
-import { ENROLLMENT_STATUSES } from '~/common/constants/enrollmentStatuses';
+import { EnrollmentStatus } from '~/common/constants/app-enums';
+import FormItem from '~/components/FormItem';
+import { FREQUENCIES } from '~/common/constants/Frequency';
 
 const { Option } = Select;
 
@@ -19,6 +21,8 @@ const CourseStudentEnrollPage = () => {
     const [selectedStudent, setSelectedStudent] = useState(null);
     const [status, setStatus] = useState('');
     const [enrollmentDate, setEnrollmentDate] = useState(null);
+
+    const [form] = Form.useForm();
 
     const [errors, setErrors] = useState({
         phone: '',
@@ -80,14 +84,14 @@ const CourseStudentEnrollPage = () => {
         setIsModalVisible(true);
     };
 
-    const handleEnrollStudent = async () => {
-        if (!status || !enrollmentDate) {
-            message.error('Please provide both status and enrollment date.');
-            return;
-        }
+    const handleEnrollStudent = async (values) => {
+        const enrollmentData = {
+            ...values,
+            enrollmentDate: values.enrollmentDate.format('YYYY-MM-DD'),
+        };
 
         setIsAdding(true);
-        const { errorMessage } = await addStudentToCourse(courseId, selectedStudent.id, { status, enrollmentDate: enrollmentDate.format('YYYY-MM-DD') });
+        const { errorMessage } = await addStudentToCourse(courseId, selectedStudent.id, enrollmentData);
 
         if (errorMessage) {
             message.error(`Failed to add student: ${errorMessage}`);
@@ -102,9 +106,8 @@ const CourseStudentEnrollPage = () => {
 
     const closeModal = () => {
         setIsModalVisible(false);
-        setStatus('');
-        setEnrollmentDate(null);
         setSelectedStudent(null);
+        form.resetFields();
     };
 
     return (
@@ -165,21 +168,61 @@ const CourseStudentEnrollPage = () => {
                     </List.Item>
                 )}
             />
-            <Modal title="Enroll Student" visible={isModalVisible} onOk={handleEnrollStudent} onCancel={closeModal} confirmLoading={isAdding}>
-                <div style={{ marginBottom: '16px' }}>
-                    <label>Status:</label>
-                    <Select value={status} onChange={(value) => setStatus(value)} style={{ width: '100%' }}>
-                        {ENROLLMENT_STATUSES.map((status) => (
-                            <Option key={status} value={status}>
-                                {status}
-                            </Option>
-                        ))}
-                    </Select>
-                </div>
-                <div>
-                    <label>Enrollment Date:</label>
-                    <DatePicker value={enrollmentDate} onChange={(date) => setEnrollmentDate(date)} format="YYYY-MM-DD" style={{ width: '100%' }} />
-                </div>
+            <Modal title="Enroll Student" visible={isModalVisible} onCancel={closeModal} footer={null} confirmLoading={isAdding}>
+                <Form
+                    form={form}
+                    layout="vertical"
+                    onFinish={handleEnrollStudent}
+                    initialValues={{
+                        status: '',
+                        enrollmentDate: null,
+                    }}
+                >
+                    <FormItem
+                        label="Status"
+                        name="status"
+                        rules={[{ required: true }]}
+                        element={
+                            <Select placeholder="Select status">
+                                {Object.entries(EnrollmentStatus).map(([key, value]) => (
+                                    <Option key={key} value={key}>
+                                        {value}
+                                    </Option>
+                                ))}
+                            </Select>
+                        }
+                    />
+                    <FormItem label="Enrollment Date" name="enrollmentDate" rules={[{ required: true }]} element={<DatePicker format="YYYY-MM-DD" />} />
+                    <FormItem label="Start Date" name="startDate" rules={[{ required: true }]} element={<DatePicker format="YYYY-MM-DD" />} />
+                    <FormItem label="End Date" name="endDate" element={<DatePicker format="YYYY-MM-DD" />} />
+                    <FormItem
+                        label="Frequency"
+                        name="frequency"
+                        rules={[{ required: true }]}
+                        element={
+                            <Select placeholder="Select frequency">
+                                {FREQUENCIES.map((frequency) => (
+                                    <Option key={frequency} value={frequency}>
+                                        {frequency}
+                                    </Option>
+                                ))}
+                            </Select>
+                        }
+                    />
+                    <FormItem label="Total Learning Days" name="totalLearningDays" rules={[{ type: 'number', min: 0, max: 99 }]} element={<InputNumber value={11} />} />
+
+                    <Form.Item>
+                        <Button type="primary" htmlType="submit" loading={isAdding}>
+                            Enroll
+                        </Button>
+                    </Form.Item>
+
+                    <Form.Item>
+                        <Button onClick={closeModal} loading={isAdding}>
+                            Cancel
+                        </Button>
+                    </Form.Item>
+                </Form>
             </Modal>
         </div>
     );
